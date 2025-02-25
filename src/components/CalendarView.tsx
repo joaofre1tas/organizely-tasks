@@ -103,4 +103,111 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
                 selected={selectedDate}
                 onSelect={setSelectedDate}
                 month={currentDate}
-                on
+                onMonthChange={setCurrentDate}
+                className="rounded-md border"
+                classNames={{
+                  day_today: "bg-primary text-primary-foreground"
+                }}
+                components={{
+                  day: ({ date, ...props }) => {
+                    const dateHasTasks = tasks.some(task => 
+                      task.dueDate && isSameDay(new Date(task.dueDate), date)
+                    );
+                    
+                    return (
+                      <div 
+                        {...props}
+                        className={`relative ${props.className}`}
+                      >
+                        {date.getDate()}
+                        {dateHasTasks && (
+                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>
+                        )}
+                      </div>
+                    );
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {view === "week" && (
+            <div className="grid grid-cols-7 gap-2">
+              {weekDates.map((date, i) => (
+                <div 
+                  key={i} 
+                  className={`p-2 rounded-md cursor-pointer border ${
+                    isSameDay(date, selectedDate || new Date()) ? "bg-primary/10 border-primary" : ""
+                  }`}
+                  onClick={() => setSelectedDate(date)}
+                >
+                  <div className="text-center mb-1">
+                    <div className="text-xs text-muted-foreground">
+                      {format(date, "EEEE", { locale: pt })}
+                    </div>
+                    <div className={`text-lg font-medium ${
+                      isSameDay(date, new Date()) ? "text-primary" : ""
+                    }`}>
+                      {format(date, "d", { locale: pt })}
+                    </div>
+                  </div>
+                  <div className="text-xs text-center">
+                    {getTasksForDate(date).length > 0 ? (
+                      `${getTasksForDate(date).length} tarefa${getTasksForDate(date).length !== 1 ? 's' : ''}`
+                    ) : (
+                      <span className="text-muted-foreground">Sem tarefas</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {view === "day" && (
+            <div className="flex flex-col items-center">
+              <div className="mb-4 text-center">
+                <h3 className="text-lg font-medium">
+                  {format(currentDate, "EEEE, d 'de' MMMM", { locale: pt })}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {getTasksForDate(currentDate).length > 0 
+                    ? `${getTasksForDate(currentDate).length} tarefa${getTasksForDate(currentDate).length !== 1 ? 's' : ''}`
+                    : "Sem tarefas para hoje"
+                  }
+                </p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-bold mb-4">
+          {selectedDate 
+            ? `Tarefas para ${format(selectedDate, "dd/MM/yyyy")}`
+            : "Selecione uma data para ver as tarefas"
+          }
+        </h2>
+        {selectedDateTasks.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {selectedDateTasks.map(task => (
+              <TaskCard 
+                key={task.id} 
+                task={task} 
+                onEditTask={() => onEditTask(task)} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <CalendarIcon className="h-12 w-12 text-muted-foreground opacity-50 mb-2" />
+            <h3 className="text-lg font-medium">Sem tarefas para esta data</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Selecione outra data ou adicione novas tarefas.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
