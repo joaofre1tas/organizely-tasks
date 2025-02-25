@@ -26,10 +26,11 @@ import { cn } from "@/lib/utils";
 
 interface TaskCardProps {
   task: Task;
+  onEditTask: () => void;
 }
 
-export function TaskCard({ task }: TaskCardProps) {
-  const { toggleTaskCompletion, deleteTask, setSelectedTask } = useTask();
+export function TaskCard({ task, onEditTask }: TaskCardProps) {
+  const { toggleTaskCompletion, deleteTask } = useTask();
   
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -59,10 +60,6 @@ export function TaskCard({ task }: TaskCardProps) {
       default:
         return 'Sem prioridade';
     }
-  };
-
-  const handleEdit = () => {
-    setSelectedTask(task);
   };
 
   return (
@@ -106,7 +103,7 @@ export function TaskCard({ task }: TaskCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleEdit}>
+            <DropdownMenuItem onClick={onEditTask}>
               Editar
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => toggleTaskCompletion(task.id)}>

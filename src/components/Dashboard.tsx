@@ -16,17 +16,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TaskCard } from "@/components/TaskCard";
-import { TaskForm } from "@/components/TaskForm";
 import { formatDistance } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export function Dashboard() {
+interface DashboardProps {
+  onOpenTaskForm: () => void;
+}
+
+export function Dashboard({ onOpenTaskForm }: DashboardProps) {
   const { currentWorkspace } = useWorkspace();
   const { tasks, getTasksByWorkspace, setSelectedTask } = useTask();
   const [searchQuery, setSearchQuery] = useState("");
   const [workspaceTasks, setWorkspaceTasks] = useState<any[]>([]);
-  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   
   useEffect(() => {
     if (currentWorkspace) {
@@ -59,11 +67,12 @@ export function Dashboard() {
 
   const handleOpenNewTaskForm = () => {
     setSelectedTask(null);
-    setIsTaskFormOpen(true);
+    onOpenTaskForm();
   };
 
-  const handleCloseTaskForm = () => {
-    setIsTaskFormOpen(false);
+  const handleFilterClick = () => {
+    // Implement filter functionality here
+    console.log("Filter clicked");
   };
 
   return (
@@ -157,17 +166,35 @@ export function Dashboard() {
             <TabsTrigger value="pending">Pendentes</TabsTrigger>
             <TabsTrigger value="completed">Concluídas</TabsTrigger>
           </TabsList>
-          <Button variant="outline" size="sm" className="gap-1">
-            <Filter className="h-4 w-4" />
-            Filtrar
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Filter className="h-4 w-4" />
+                Filtrar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>Por data (mais recente)</DropdownMenuItem>
+              <DropdownMenuItem>Por data (mais antiga)</DropdownMenuItem>
+              <DropdownMenuItem>Por prioridade</DropdownMenuItem>
+              <DropdownMenuItem>Por nome (A-Z)</DropdownMenuItem>
+              <DropdownMenuItem>Por nome (Z-A)</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         <TabsContent value="all" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTasks.length > 0 ? (
               filteredTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onEditTask={() => {
+                    setSelectedTask(task);
+                    onOpenTaskForm();
+                  }}
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-8">
@@ -181,7 +208,14 @@ export function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {pendingTasks.length > 0 ? (
               pendingTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onEditTask={() => {
+                    setSelectedTask(task);
+                    onOpenTaskForm();
+                  }}
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-8">
@@ -195,7 +229,14 @@ export function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {completedTasks.length > 0 ? (
               completedTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onEditTask={() => {
+                    setSelectedTask(task);
+                    onOpenTaskForm();
+                  }}
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-8">
@@ -205,11 +246,6 @@ export function Dashboard() {
           </div>
         </TabsContent>
       </Tabs>
-
-      <TaskForm 
-        open={isTaskFormOpen} 
-        onClose={handleCloseTaskForm} 
-      />
     </div>
   );
 }

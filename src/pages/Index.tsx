@@ -8,6 +8,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { TaskForm } from "@/components/TaskForm";
 
 const Index = () => {
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  
   return (
     <WorkspaceProvider>
       <TaskProvider>
@@ -15,7 +17,11 @@ const Index = () => {
           <div className="min-h-screen flex w-full">
             <AppSidebar />
             <main className="flex-1 overflow-auto">
-              <Dashboard />
+              <Dashboard onOpenTaskForm={() => setIsTaskFormOpen(true)} />
+              <TaskForm 
+                open={isTaskFormOpen} 
+                onClose={() => setIsTaskFormOpen(false)} 
+              />
             </main>
           </div>
         </SidebarProvider>
