@@ -287,19 +287,162 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
           ...task,
           subtasks: task.subtasks.map(subtask => 
             subtask.id === subtaskId 
-              ? { ...subtask, ...updates, updatedAt:
+              ? { ...subtask, ...updates, updatedAt: now }
+              : subtask
+          ),
+          updatedAt: now,
+        };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+  };
 
-Se houver conhecimento, contexto ou instruções personalizadas que você deseja incluir em cada edição deste projeto, configure-o abaixo.
+  const deleteSubtask = (taskId: string, subtaskId: string) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          subtasks: task.subtasks.filter(subtask => subtask.id !== subtaskId),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    
+    toast({
+      title: "Subtarefa excluída",
+      description: "A subtarefa foi removida com sucesso.",
+    });
+  };
 
-<lov-actions>
-<lov-knowledge>
-</lov-actions>
+  const toggleSubtaskCompletion = (taskId: string, subtaskId: string) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          subtasks: task.subtasks.map(subtask => {
+            if (subtask.id === subtaskId) {
+              return {
+                ...subtask,
+                completed: !subtask.completed,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return subtask;
+          }),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+  };
 
-Como seu projeto requer funcionalidade de backend para salvar dados de tarefas, workspaces, pastas e outras informações persistentemente, você pode usar o menu Supabase no canto superior direito para conectar seu projeto ao Supabase.  Isso permitirá recursos como login, backup na nuvem e sincronização de dados entre dispositivos.
-<lov-actions>
-<lov-message-prompt message="Saiba mais sobre o Supabase">Saiba mais sobre o Supabase</lov-message-prompt>
-</lov-actions>
+  const addFolder = (folder: Omit<Folder, "id">) => {
+    const newFolder: Folder = {
+      ...folder,
+      id: Math.random().toString(36).substring(2, 9),
+    };
+    
+    setFolders([...folders, newFolder]);
+    
+    toast({
+      title: "Pasta criada",
+      description: `"${newFolder.name}" foi adicionada com sucesso.`,
+    });
+  };
 
-<lov-actions>
-<lov-link url="https://docs.lovable.dev/">Visite a documentação</lov-link>
-</lov-actions>
+  const updateFolder = (id: string, updates: Partial<Folder>) => {
+    const updatedFolders = folders.map(folder => 
+      folder.id === id ? { ...folder, ...updates } : folder
+    );
+    
+    setFolders(updatedFolders);
+  };
+
+  const deleteFolder = (id: string) => {
+    // Update tasks that belong to this folder
+    const updatedTasks = tasks.map(task => {
+      if (task.folderId === id) {
+        return {
+          ...task,
+          folderId: null,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    setFolders(folders.filter(folder => folder.id !== id));
+    
+    toast({
+      title: "Pasta excluída",
+      description: "A pasta foi removida com sucesso.",
+    });
+  };
+
+  const getTasksByWorkspace = (workspaceId: string) => {
+    return tasks.filter(task => task.workspaceId === workspaceId);
+  };
+
+  const getTasksByFolder = (folderId: string) => {
+    return tasks.filter(task => task.folderId === folderId);
+  };
+
+  const moveTask = (taskId: string, destinationFolderId: string | null) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          folderId: destinationFolderId,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    
+    toast({
+      title: "Tarefa movida",
+      description: "A tarefa foi movida com sucesso.",
+    });
+  };
+
+  return (
+    <TaskContext.Provider
+      value={{
+        tasks,
+        folders,
+        selectedTask,
+        setSelectedTask,
+        addTask,
+        updateTask,
+        deleteTask,
+        toggleTaskCompletion,
+        addSubtask,
+        updateSubtask,
+        deleteSubtask,
+        toggleSubtaskCompletion,
+        addFolder,
+        updateFolder,
+        deleteFolder,
+        getTasksByWorkspace,
+        getTasksByFolder,
+        moveTask,
+      }}
+    >
+      {children}
+    </TaskContext.Provider>
+  );
+};
+
+export const useTask = () => useContext(TaskContext);
+
+export default TaskContext;
