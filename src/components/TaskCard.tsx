@@ -61,6 +61,10 @@ export function TaskCard({ task }: TaskCardProps) {
     }
   };
 
+  const handleEdit = () => {
+    setSelectedTask(task);
+  };
+
   return (
     <Card className={cn(
       "task-item-hover", 
@@ -102,7 +106,7 @@ export function TaskCard({ task }: TaskCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setSelectedTask(task)}>
+            <DropdownMenuItem onClick={handleEdit}>
               Editar
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => toggleTaskCompletion(task.id)}>

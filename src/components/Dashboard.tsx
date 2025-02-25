@@ -16,15 +16,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TaskCard } from "@/components/TaskCard";
+import { TaskForm } from "@/components/TaskForm";
 import { formatDistance } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function Dashboard() {
   const { currentWorkspace } = useWorkspace();
-  const { tasks, getTasksByWorkspace } = useTask();
+  const { tasks, getTasksByWorkspace, setSelectedTask } = useTask();
   const [searchQuery, setSearchQuery] = useState("");
   const [workspaceTasks, setWorkspaceTasks] = useState<any[]>([]);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   
   useEffect(() => {
     if (currentWorkspace) {
@@ -55,6 +57,15 @@ export function Dashboard() {
     return diffDays >= 0 && diffDays <= 3;
   });
 
+  const handleOpenNewTaskForm = () => {
+    setSelectedTask(null);
+    setIsTaskFormOpen(true);
+  };
+
+  const handleCloseTaskForm = () => {
+    setIsTaskFormOpen(false);
+  };
+
   return (
     <div className="container py-6">
       <div className="flex items-center justify-between mb-6">
@@ -74,7 +85,7 @@ export function Dashboard() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="gap-1">
+          <Button className="gap-1" onClick={handleOpenNewTaskForm}>
             <Plus className="h-4 w-4" />
             Nova Tarefa
           </Button>
@@ -194,6 +205,11 @@ export function Dashboard() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <TaskForm 
+        open={isTaskFormOpen} 
+        onClose={handleCloseTaskForm} 
+      />
     </div>
   );
 }

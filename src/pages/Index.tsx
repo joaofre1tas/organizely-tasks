@@ -1,15 +1,13 @@
 
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { TaskProvider } from "@/contexts/TaskContext";
 import { Dashboard } from "@/components/Dashboard";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { TaskForm } from "@/components/TaskForm";
 
 const Index = () => {
-  const navigate = useNavigate();
-
   return (
     <WorkspaceProvider>
       <TaskProvider>
