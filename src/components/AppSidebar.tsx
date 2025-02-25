@@ -3,14 +3,15 @@ import { useState } from "react";
 import { 
   Home, 
   Briefcase, 
-  Folder, 
   Calendar, 
   Settings, 
   CheckCircle, 
   Clock, 
-  Flag, 
+  Flag,
   Plus,
-  ChevronRight
+  ChevronLeft,
+  ChevronRight,
+  Filter
 } from "lucide-react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import {
@@ -37,37 +38,43 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  onViewChange: (view: "dashboard" | "calendar" | "today" | "upcoming" | "priority") => void;
+  currentView: string;
+}
+
+export function AppSidebar({ onViewChange, currentView }: AppSidebarProps) {
   const { workspaces, currentWorkspace, setCurrentWorkspace } = useWorkspace();
   const { toast } = useToast();
   const { state } = useSidebar();
   const [isHovered, setIsHovered] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
 
   const mainMenuItems = [
     {
       title: "Visão Geral",
-      url: "/",
+      view: "dashboard",
       icon: Home,
     },
     {
       title: "Hoje",
-      url: "/",
+      view: "today",
       icon: CheckCircle,
     },
     {
       title: "Próximas",
-      url: "/",
+      view: "upcoming",
       icon: Clock,
     },
     {
       title: "Calendário",
-      url: "/",
+      view: "calendar",
       icon: Calendar,
     },
     {
       title: "Prioritárias",
-      url: "/",
+      view: "priority",
       icon: Flag,
     }
   ];
@@ -80,17 +87,21 @@ export function AppSidebar() {
     });
   };
 
+  const handleFilterClick = () => {
+    setIsFilterDialogOpen(true);
+  };
+
   return (
     <>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="flex items-center px-4 py-2">
-          <div className="flex items-center justify-between w-full">
+        <SidebarHeader className="p-2">
+          <div className="flex items-center justify-between w-full px-2 py-1">
             <div className="flex items-center space-x-2 font-semibold">
               <CheckCircle className="h-5 w-5 text-primary" />
               <span>TaskMaster</span>
             </div>
-            <SidebarTrigger className="h-8 w-8 p-0 ml-2">
-              <ChevronRight className="h-4 w-4" />
+            <SidebarTrigger className="h-8 w-8 p-0">
+              {state === "expanded" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </SidebarTrigger>
           </div>
         </SidebarHeader>
@@ -103,19 +114,28 @@ export function AppSidebar() {
                 {mainMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      asChild
                       tooltip={item.title}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        currentView === item.view && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      )}
+                      onClick={() => onViewChange(item.view as any)}
                     >
-                      <a 
-                        href={item.url}
-                        className="flex items-center gap-3 rounded-md px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </a>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    tooltip="Filtrar"
+                    className="flex items-center gap-3 px-3 py-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    onClick={handleFilterClick}
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span>Filtrar</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -181,11 +201,44 @@ export function AppSidebar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Filtrar Tarefas</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Opções de filtro aparecerão aqui.</p>
+            <div className="grid gap-4 mt-4">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Prioridade</h3>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm">Urgente</Button>
+                  <Button variant="outline" size="sm">Alta</Button>
+                  <Button variant="outline" size="sm">Média</Button>
+                  <Button variant="outline" size="sm">Baixa</Button>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium mb-2">Status</h3>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm">Pendentes</Button>
+                  <Button variant="outline" size="sm">Concluídas</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsFilterDialogOpen(false)} variant="outline">Cancelar</Button>
+            <Button onClick={() => setIsFilterDialogOpen(false)}>Aplicar Filtros</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
 
-// Create SidebarTrigger component as the one provided by the library doesn't work properly with our customization
+// Custom SidebarTrigger component
 function SidebarTrigger({ className, children, ...props }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
 
