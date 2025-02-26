@@ -29,6 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "@/hooks/use-toast";
 
 interface TaskFormProps {
   open: boolean;
@@ -95,33 +96,59 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
-    
-    if (isEditMode && task) {
-      updateTask(task.id, {
-        title,
-        description,
-        priority,
-        dueDate: dueDate ? dueDate.toISOString() : null,
-        folderId: selectedFolder,
-        tags: selectedTags,
-        status
+    if (!title.trim()) {
+      toast({
+        title: "Erro",
+        description: "O título da tarefa é obrigatório",
+        variant: "destructive",
       });
-    } else if (currentWorkspace) {
-      addTask({
-        title,
-        description,
-        priority,
-        dueDate: dueDate ? dueDate.toISOString() : null,
-        folderId: selectedFolder,
-        tags: selectedTags,
-        workspaceId: currentWorkspace.id,
-        status
-      });
+      return;
     }
     
-    resetForm();
-    onClose();
+    try {
+      if (isEditMode && task) {
+        updateTask(task.id, {
+          title,
+          description,
+          priority,
+          dueDate: dueDate ? dueDate.toISOString() : null,
+          folderId: selectedFolder,
+          tags: selectedTags,
+          status
+        });
+        
+        toast({
+          title: "Sucesso",
+          description: "Tarefa atualizada com sucesso",
+        });
+      } else if (currentWorkspace) {
+        addTask({
+          title,
+          description,
+          priority,
+          dueDate: dueDate ? dueDate.toISOString() : null,
+          folderId: selectedFolder,
+          tags: selectedTags,
+          workspaceId: currentWorkspace.id,
+          status
+        });
+        
+        toast({
+          title: "Sucesso",
+          description: "Tarefa criada com sucesso",
+        });
+      }
+      
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error("Erro ao salvar tarefa:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar a tarefa",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleCancel = () => {
@@ -176,7 +203,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
               <label className="text-sm font-medium">Prioridade</label>
               <Select 
                 value={priority} 
-                onValueChange={(value: Priority) => setPriority(value)}
+                onValueChange={(value) => setPriority(value as Priority)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a prioridade" />
@@ -194,7 +221,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
               <label className="text-sm font-medium">Status</label>
               <Select 
                 value={status} 
-                onValueChange={(value: Status) => setStatus(value)}
+                onValueChange={(value) => setStatus(value as Status)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o status" />

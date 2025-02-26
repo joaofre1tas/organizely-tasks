@@ -209,60 +209,76 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
   }, [tags]);
 
   const addTask = (task: Omit<Task, "id" | "createdAt" | "updatedAt" | "subtasks" | "completed">) => {
-    const now = new Date().toISOString();
-    const newTask: Task = {
-      ...task,
-      id: Math.random().toString(36).substring(2, 9),
-      createdAt: now,
-      updatedAt: now,
-      subtasks: [],
-      completed: false,
-    };
-    
-    setTasks([...tasks, newTask]);
-    toast({
-      title: "Tarefa criada",
-      description: `"${newTask.title}" foi adicionada com sucesso.`,
-    });
-    
-    return newTask;
+    try {
+      const now = new Date().toISOString();
+      const newTask: Task = {
+        ...task,
+        id: Math.random().toString(36).substring(2, 9),
+        createdAt: now,
+        updatedAt: now,
+        subtasks: [],
+        completed: false,
+      };
+      
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+      
+      return newTask;
+    } catch (error) {
+      console.error("Erro ao adicionar tarefa:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao adicionar a tarefa",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
-    const updatedTasks = tasks.map(task => {
-      if (task.id === id) {
-        const updatedTask = {
-          ...task,
-          ...updates,
-          updatedAt: new Date().toISOString(),
-        };
-        
-        // If status is changed to completed, mark completed as true
-        if (updates.status === "completed" && !updatedTask.completed) {
-          updatedTask.completed = true;
+    try {
+      const updatedTasks = tasks.map(task => {
+        if (task.id === id) {
+          const updatedTask = {
+            ...task,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          };
+          
+          // If status is changed to completed, mark completed as true
+          if (updates.status === "completed" && !updatedTask.completed) {
+            updatedTask.completed = true;
+          }
+          
+          // If status is changed from completed, mark completed as false
+          if (updates.status && updates.status !== "completed" && updatedTask.completed) {
+            updatedTask.completed = false;
+          }
+          
+          // If completed is changed, update status accordingly
+          if (updates.completed !== undefined) {
+            updatedTask.status = updates.completed ? "completed" as Status : 
+              (updatedTask.status === "completed" ? "todo" as Status : updatedTask.status);
+          }
+          
+          if (selectedTask?.id === id) {
+            setSelectedTask(updatedTask);
+          }
+          
+          return updatedTask;
         }
-        
-        // If status is changed from completed, mark completed as false
-        if (updates.status && updates.status !== "completed" && updatedTask.completed) {
-          updatedTask.completed = false;
-        }
-        
-        // If completed is changed, update status accordingly
-        if (updates.completed !== undefined) {
-          updatedTask.status = updates.completed ? "completed" as Status : 
-            (updatedTask.status === "completed" ? "todo" as Status : updatedTask.status);
-        }
-        
-        if (selectedTask?.id === id) {
-          setSelectedTask(updatedTask);
-        }
-        
-        return updatedTask;
-      }
-      return task;
-    });
-    
-    setTasks(updatedTasks);
+        return task;
+      });
+      
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao atualizar a tarefa",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   const deleteTask = (id: string) => {
@@ -536,67 +552,4 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
     const updatedTags = tags.map(tag => {
       if (tag.id === id) {
         return {
-          ...tag,
-          ...updates,
-        };
-      }
-      return tag;
-    });
-    
-    setTags(updatedTags);
-  };
-  
-  const deleteTag = (id: string) => {
-    // Remove tag from all tasks
-    const updatedTasks = tasks.map(task => ({
-      ...task,
-      tags: task.tags.filter(tag => tag.id !== id),
-      subtasks: task.subtasks.map(subtask => ({
-        ...subtask,
-        tags: subtask.tags.filter(tag => tag.id !== id)
-      }))
-    }));
-    
-    setTasks(updatedTasks);
-    setTags(tags.filter(tag => tag.id !== id));
-    
-    toast({
-      title: "Tag excluída",
-      description: "A tag foi removida com sucesso.",
-    });
-  };
-
-  return (
-    <TaskContext.Provider
-      value={{
-        tasks,
-        folders,
-        selectedTask,
-        setSelectedTask,
-        addTask,
-        updateTask,
-        deleteTask,
-        toggleTaskCompletion,
-        updateTaskStatus,
-        addSubtask,
-        updateSubtask,
-        deleteSubtask,
-        toggleSubtaskCompletion,
-        addFolder,
-        updateFolder,
-        deleteFolder,
-        getTasksByWorkspace,
-        getTasksByFolder,
-        moveTask,
-        getTags,
-        addTag,
-        updateTag,
-        deleteTag,
-      }}
-    >
-      {children}
-    </TaskContext.Provider>
-  );
-};
-
-export const useTask = () => useContext(TaskContext);
+          ...
