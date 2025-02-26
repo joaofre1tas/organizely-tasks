@@ -52,6 +52,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<TaskTag[]>([]);
+  const [status, setStatus] = useState<Status>("todo");
   
   const availableTags: TaskTag[] = [
     { id: "1", name: "Trabalho", color: "#4c6ef5" },
@@ -67,6 +68,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
       setDescription(task.description);
       setPriority(task.priority);
       setSelectedFolder(task.folderId);
+      setStatus(task.status);
       
       if (task.dueDate) {
         setDueDate(new Date(task.dueDate));
@@ -87,6 +89,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     setDueDate(null);
     setSelectedFolder(null);
     setSelectedTags([]);
+    setStatus("todo");
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,6 +105,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         dueDate: dueDate ? dueDate.toISOString() : null,
         folderId: selectedFolder,
         tags: selectedTags,
+        status
       });
     } else if (currentWorkspace) {
       addTask({
@@ -112,6 +116,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         folderId: selectedFolder,
         tags: selectedTags,
         workspaceId: currentWorkspace.id,
+        status
       });
     }
     
@@ -186,6 +191,25 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
             </div>
             
             <div className="space-y-2">
+              <label className="text-sm font-medium">Status</label>
+              <Select 
+                value={status} 
+                onValueChange={(value: Status) => setStatus(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todo">A Fazer</SelectItem>
+                  <SelectItem value="in-progress">Em Andamento</SelectItem>
+                  <SelectItem value="completed">Concluído</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Pasta</label>
               <Select 
                 value={selectedFolder || ""} 
@@ -204,33 +228,33 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Data de vencimento</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {dueDate ? (
-                    format(dueDate, "PPP", { locale: pt })
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <CalendarComponent
-                  mode="single"
-                  selected={dueDate || undefined}
-                  onSelect={setDueDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Data de vencimento</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {dueDate ? (
+                      format(dueDate, "PPP", { locale: pt })
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dueDate || undefined}
+                    onSelect={setDueDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           
           <div className="space-y-2">
