@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useWorkspace } from "./WorkspaceContext";
 import { toast } from "@/hooks/use-toast";
@@ -47,7 +48,7 @@ type TaskContextType = {
   folders: Folder[];
   selectedTask: Task | null;
   setSelectedTask: (task: Task | null) => void;
-  addTask: (task: Omit<Task, "id" | "createdAt" | "updatedAt" | "subtasks" | "completed" | "status">) => void;
+  addTask: (task: Omit<Task, "id" | "createdAt" | "updatedAt" | "subtasks" | "completed">) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTaskCompletion: (id: string) => void;
@@ -207,7 +208,7 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("tags", JSON.stringify(tags));
   }, [tags]);
 
-  const addTask = (task: Omit<Task, "id" | "createdAt" | "updatedAt" | "subtasks" | "completed" | "status">) => {
+  const addTask = (task: Omit<Task, "id" | "createdAt" | "updatedAt" | "subtasks" | "completed">) => {
     const now = new Date().toISOString();
     const newTask: Task = {
       ...task,
@@ -216,7 +217,6 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
       updatedAt: now,
       subtasks: [],
       completed: false,
-      status: "todo" as Status
     };
     
     setTasks([...tasks, newTask]);
