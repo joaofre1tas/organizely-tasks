@@ -137,8 +137,7 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
                   day_today: "bg-primary text-primary-foreground"
                 }}
                 components={{
-                  Day: ({ day, ...props }) => {
-                    const date = day.date;
+                  Day: ({ date, ...props }: any) => {
                     const dateHasTasks = tasks.some(task => 
                       task.dueDate && isSameDay(new Date(task.dueDate), date)
                     );
@@ -146,7 +145,7 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
                     return (
                       <div 
                         {...props}
-                        className={`relative ${props.className}`}
+                        className={`relative ${props.className || ""}`}
                       >
                         {date.getDate()}
                         {dateHasTasks && (

@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { Calendar, Clock, Tag, X, Save, AlertCircle, CheckCircle, PlayCircle, Hash, Folder } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { useTask, Priority, Tag as TaskTag, Task } from "@/contexts/TaskContext";
+import { useTask, Priority, Tag as TaskTag, Task, Status } from "@/contexts/TaskContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +107,6 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
       addTask({
         title,
         description,
-        completed: false,
         priority,
         dueDate: dueDate ? dueDate.toISOString() : null,
         folderId: selectedFolder,

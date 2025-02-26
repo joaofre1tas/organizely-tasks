@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useWorkspace } from "./WorkspaceContext";
 import { toast } from "@/hooks/use-toast";
@@ -92,7 +91,7 @@ const defaultTasks: Task[] = [
     title: "Criar apresentação para reunião",
     description: "Preparar slides para a reunião de quinta-feira",
     completed: false,
-    status: "todo",
+    status: "todo" as Status,
     dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
     priority: "high",
     tags: [defaultTags[0], defaultTags[3]],
@@ -107,7 +106,7 @@ const defaultTasks: Task[] = [
         title: "Coletar dados para gráficos",
         description: "Obter dados de vendas do último trimestre",
         completed: false,
-        status: "todo",
+        status: "todo" as Status,
         dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
         priority: "medium",
         tags: [defaultTags[0]],
@@ -123,7 +122,7 @@ const defaultTasks: Task[] = [
     title: "Comprar mantimentos",
     description: "Leite, ovos, pão, frutas",
     completed: false,
-    status: "todo",
+    status: "todo" as Status,
     dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
     priority: "medium",
     tags: [defaultTags[4]],
@@ -138,7 +137,7 @@ const defaultTasks: Task[] = [
     title: "Revisar contrato do cliente",
     description: "Verificar cláusulas contratuais antes da renovação",
     completed: false,
-    status: "todo",
+    status: "todo" as Status,
     dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     priority: "urgent",
     tags: [defaultTags[0], defaultTags[1]],
@@ -217,7 +216,7 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
       updatedAt: now,
       subtasks: [],
       completed: false,
-      status: "todo"
+      status: "todo" as Status
     };
     
     setTasks([...tasks, newTask]);
@@ -250,8 +249,8 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
         
         // If completed is changed, update status accordingly
         if (updates.completed !== undefined) {
-          updatedTask.status = updates.completed ? "completed" : 
-            (updatedTask.status === "completed" ? "todo" : updatedTask.status);
+          updatedTask.status = updates.completed ? "completed" as Status : 
+            (updatedTask.status === "completed" ? "todo" as Status : updatedTask.status);
         }
         
         if (selectedTask?.id === id) {
@@ -286,7 +285,7 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
         return {
           ...task,
           completed,
-          status: completed ? "completed" : "todo",
+          status: completed ? "completed" as Status : "todo" as Status,
           updatedAt: new Date().toISOString(),
         };
       }
@@ -321,7 +320,7 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
       createdAt: now,
       updatedAt: now,
       completed: false,
-      status: "todo"
+      status: "todo" as Status
     };
     
     const updatedTasks = tasks.map(task => {
@@ -370,8 +369,8 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
               
               // If completed is changed, update status accordingly
               if (updates.completed !== undefined) {
-                updatedSubtask.status = updates.completed ? "completed" : 
-                  (updatedSubtask.status === "completed" ? "todo" : updatedSubtask.status);
+                updatedSubtask.status = updates.completed ? "completed" as Status : 
+                  (updatedSubtask.status === "completed" ? "todo" as Status : updatedSubtask.status);
               }
               
               return updatedSubtask;
@@ -418,7 +417,7 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
               return {
                 ...subtask,
                 completed,
-                status: completed ? "completed" : "todo",
+                status: completed ? "completed" as Status : "todo" as Status,
                 updatedAt: new Date().toISOString(),
               };
             }
