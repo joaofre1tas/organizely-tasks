@@ -227,4 +227,11 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-
+          <div className="flex flex-col items-center p-8 bg-muted/20 rounded-lg">
+            <p className="text-muted-foreground">Não há tarefas para esta data</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
