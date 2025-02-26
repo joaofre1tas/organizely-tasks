@@ -10,7 +10,7 @@ import {
   CheckCircle,
   Flag
 } from "lucide-react";
-import { useTask } from "@/contexts/TaskContext";
+import { useTask, Task } from "@/contexts/TaskContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,10 +27,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface DashboardProps {
-  onOpenTaskForm: () => void;
+  onOpenTaskForm: (task?: Task) => void;
+  filter?: "today" | "upcoming" | "priority";
 }
 
-export function Dashboard({ onOpenTaskForm }: DashboardProps) {
+export function Dashboard({ onOpenTaskForm, filter }: DashboardProps) {
   const { currentWorkspace } = useWorkspace();
   const { tasks, getTasksByWorkspace, setSelectedTask } = useTask();
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,6 +66,31 @@ export function Dashboard({ onOpenTaskForm }: DashboardProps) {
     return diffDays >= 0 && diffDays <= 3;
   });
 
+  // Tarefas para hoje
+  const todayTasks = pendingTasks.filter(task => {
+    if (!task.dueDate) return false;
+    const dueDate = new Date(task.dueDate);
+    const now = new Date();
+    return dueDate.getDate() === now.getDate() &&
+      dueDate.getMonth() === now.getMonth() &&
+      dueDate.getFullYear() === now.getFullYear();
+  });
+
+  // Tarefas de alta prioridade (urgentes + alta)
+  const priorityTasks = pendingTasks.filter(task => 
+    task.priority === "urgent" || task.priority === "high"
+  );
+
+  // Aplicar filtros especiais
+  const getFilteredTaskList = () => {
+    if (filter === "today") return todayTasks;
+    if (filter === "upcoming") return upcomingTasks;
+    if (filter === "priority") return priorityTasks;
+    return filteredTasks;
+  };
+
+  const tasksToDisplay = getFilteredTaskList();
+
   const handleOpenNewTaskForm = () => {
     setSelectedTask(null);
     onOpenTaskForm();
@@ -79,7 +105,12 @@ export function Dashboard({ onOpenTaskForm }: DashboardProps) {
     <div className="container py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">{currentWorkspace?.name || "Meu Espaço"}</h1>
+          <h1 className="text-3xl font-bold">
+            {filter === "today" && "Tarefas para Hoje"}
+            {filter === "upcoming" && "Tarefas Próximas"}
+            {filter === "priority" && "Tarefas Prioritárias"}
+            {!filter && (currentWorkspace?.name || "Meu Espaço")}
+          </h1>
           <p className="text-muted-foreground">
             {pendingTasks.length} tarefas pendentes, {completedTasks.length} concluídas
           </p>
@@ -154,7 +185,7 @@ export function Dashboard({ onOpenTaskForm }: DashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{filteredTasks.length}</p>
+            <p className="text-3xl font-bold">{tasksToDisplay.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -185,14 +216,14 @@ export function Dashboard({ onOpenTaskForm }: DashboardProps) {
         
         <TabsContent value="all" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTasks.length > 0 ? (
-              filteredTasks.map(task => (
+            {tasksToDisplay.length > 0 ? (
+              tasksToDisplay.map(task => (
                 <TaskCard 
                   key={task.id} 
                   task={task} 
                   onEditTask={() => {
                     setSelectedTask(task);
-                    onOpenTaskForm();
+                    onOpenTaskForm(task);
                   }}
                 />
               ))
@@ -213,7 +244,7 @@ export function Dashboard({ onOpenTaskForm }: DashboardProps) {
                   task={task} 
                   onEditTask={() => {
                     setSelectedTask(task);
-                    onOpenTaskForm();
+                    onOpenTaskForm(task);
                   }}
                 />
               ))
@@ -234,7 +265,7 @@ export function Dashboard({ onOpenTaskForm }: DashboardProps) {
                   task={task} 
                   onEditTask={() => {
                     setSelectedTask(task);
-                    onOpenTaskForm();
+                    onOpenTaskForm(task);
                   }}
                 />
               ))

@@ -137,7 +137,7 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
                   day_today: "bg-primary text-primary-foreground"
                 }}
                 components={{
-                  Day: ({ date, ...props }) => {
+                  Day: ({ className, date, ...props }) => {
                     const dateHasTasks = tasks.some(task => 
                       task.dueDate && isSameDay(new Date(task.dueDate), date)
                     );
@@ -145,7 +145,7 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
                     return (
                       <div 
                         {...props}
-                        className={`relative ${props.className}`}
+                        className={`relative ${className}`}
                       >
                         {date.getDate()}
                         {dateHasTasks && (
@@ -227,15 +227,4 @@ export function CalendarView({ onEditTask }: CalendarViewProps) {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <CalendarIcon className="h-12 w-12 text-muted-foreground opacity-50 mb-2" />
-            <h3 className="text-lg font-medium">Sem tarefas para esta data</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Selecione outra data ou adicione novas tarefas.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+          <div className="flex flex-col items-

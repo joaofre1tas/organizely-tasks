@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, Clock, Tag, X } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { useTask, Priority, Tag as TaskTag } from "@/contexts/TaskContext";
+import { useTask, Priority, Tag as TaskTag, Task } from "@/contexts/TaskContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,18 +33,18 @@ import {
 interface TaskFormProps {
   open: boolean;
   onClose: () => void;
+  task: Task | null;
 }
 
-export function TaskForm({ open, onClose }: TaskFormProps) {
+export function TaskForm({ open, onClose, task }: TaskFormProps) {
   const { currentWorkspace } = useWorkspace();
   const { 
-    selectedTask, 
     addTask, 
     updateTask, 
     folders 
   } = useTask();
   
-  const isEditMode = !!selectedTask;
+  const isEditMode = !!task;
   
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -64,23 +64,23 @@ export function TaskForm({ open, onClose }: TaskFormProps) {
   
   // Carregando os dados da tarefa em modo de edição
   useEffect(() => {
-    if (selectedTask) {
-      setTitle(selectedTask.title);
-      setDescription(selectedTask.description);
-      setPriority(selectedTask.priority);
-      setSelectedFolder(selectedTask.folderId);
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setPriority(task.priority);
+      setSelectedFolder(task.folderId);
       
-      if (selectedTask.dueDate) {
-        setDueDate(new Date(selectedTask.dueDate));
+      if (task.dueDate) {
+        setDueDate(new Date(task.dueDate));
       } else {
         setDueDate(null);
       }
       
-      setSelectedTags(selectedTask.tags);
+      setSelectedTags(task.tags);
     } else {
       resetForm();
     }
-  }, [selectedTask, open]);
+  }, [task, open]);
   
   const resetForm = () => {
     setTitle("");
@@ -96,8 +96,8 @@ export function TaskForm({ open, onClose }: TaskFormProps) {
     
     if (!title.trim()) return;
     
-    if (isEditMode && selectedTask) {
-      updateTask(selectedTask.id, {
+    if (isEditMode && task) {
+      updateTask(task.id, {
         title,
         description,
         priority,
