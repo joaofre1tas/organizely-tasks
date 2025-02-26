@@ -1,6 +1,6 @@
 
 import { useContext } from "react";
-import { useTask as useTaskFromContext } from "@/contexts/TaskContext";
+import { TaskContext } from "@/contexts/TaskContext";
 
-// Re-exporte o hook para manter a compatibilidade
-export const useTask = useTaskFromContext;
+// Re-export the hook to maintain compatibility with existing imports
+export const useTask = () => useContext(TaskContext);

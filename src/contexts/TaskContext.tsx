@@ -552,4 +552,82 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
     const updatedTags = tags.map(tag => {
       if (tag.id === id) {
         return {
-          ...
+          ...tag,
+          ...updates,
+        };
+      }
+      return tag;
+    });
+    
+    setTags(updatedTags);
+  };
+  
+  const deleteTag = (id: string) => {
+    // Remove this tag from all tasks
+    const updatedTasks = tasks.map(task => {
+      const hasTag = task.tags.some(tag => tag.id === id);
+      
+      if (hasTag) {
+        return {
+          ...task,
+          tags: task.tags.filter(tag => tag.id !== id),
+          subtasks: task.subtasks.map(subtask => ({
+            ...subtask,
+            tags: subtask.tags.filter(tag => tag.id !== id)
+          })),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      
+      return task;
+    });
+    
+    if (updatedTasks.some(task => 
+      task.tags.some(tag => tag.id === id) || 
+      task.subtasks.some(subtask => subtask.tags.some(tag => tag.id === id))
+    )) {
+      setTasks(updatedTasks);
+    }
+    
+    setTags(tags.filter(tag => tag.id !== id));
+    
+    toast({
+      title: "Tag excluída",
+      description: "A tag foi removida com sucesso.",
+    });
+  };
+
+  return (
+    <TaskContext.Provider 
+      value={{ 
+        tasks, 
+        folders, 
+        selectedTask, 
+        setSelectedTask, 
+        addTask, 
+        updateTask, 
+        deleteTask, 
+        toggleTaskCompletion, 
+        updateTaskStatus, 
+        addSubtask, 
+        updateSubtask, 
+        deleteSubtask, 
+        toggleSubtaskCompletion, 
+        addFolder, 
+        updateFolder, 
+        deleteFolder, 
+        getTasksByWorkspace, 
+        getTasksByFolder, 
+        moveTask,
+        getTags,
+        addTag,
+        updateTag,
+        deleteTag
+      }}
+    >
+      {children}
+    </TaskContext.Provider>
+  );
+};
+
+export const useTask = () => useContext(TaskContext);
