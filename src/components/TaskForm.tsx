@@ -236,14 +236,14 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
             <div className="space-y-2">
               <label className="text-sm font-medium">Pasta</label>
               <Select 
-                value={selectedFolder || ""} 
-                onValueChange={(value) => setSelectedFolder(value || null)}
+                value={selectedFolder || "none"} 
+                onValueChange={(value) => setSelectedFolder(value === "none" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma pasta" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sem pasta</SelectItem>
+                  <SelectItem value="none">Sem pasta</SelectItem>
                   {workspaceFolders.map((folder) => (
                     <SelectItem key={folder.id} value={folder.id}>
                       {folder.name}
