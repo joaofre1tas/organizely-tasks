@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, Tag, X } from "lucide-react";
+import { Calendar, Clock, Tag, X, Save, AlertCircle, CheckCircle, PlayCircle, Hash, Folder } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useTask, Priority, Tag as TaskTag, Task } from "@/contexts/TaskContext";
@@ -53,7 +52,6 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<TaskTag[]>([]);
   
-  // Lista de tags disponíveis - normalmente viria de um contexto ou API
   const availableTags: TaskTag[] = [
     { id: "1", name: "Trabalho", color: "#4c6ef5" },
     { id: "2", name: "Urgente", color: "#fa5252" },
@@ -62,7 +60,6 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     { id: "5", name: "Família", color: "#ff922b" },
   ];
   
-  // Carregando os dados da tarefa em modo de edição
   useEffect(() => {
     if (task) {
       setTitle(task.title);
