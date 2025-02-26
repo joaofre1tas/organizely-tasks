@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useWorkspace } from "./WorkspaceContext";
 import { toast } from "@/hooks/use-toast";
@@ -150,7 +149,7 @@ const defaultTasks: Task[] = [
   }
 ];
 
-const TaskContext = createContext<TaskContextType>({
+export const TaskContext = createContext<TaskContextType>({
   tasks: [],
   folders: [],
   selectedTask: null,

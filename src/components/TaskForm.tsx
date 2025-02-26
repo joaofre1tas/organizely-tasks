@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, Tag, X, Save, AlertCircle, CheckCircle, PlayCircle, Hash, Folder } from "lucide-react";
+import { Calendar, Tag, X } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useTask, Priority, Tag as TaskTag, Task, Status } from "@/contexts/TaskContext";
@@ -29,7 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface TaskFormProps {
   open: boolean;
@@ -39,11 +39,8 @@ interface TaskFormProps {
 
 export function TaskForm({ open, onClose, task }: TaskFormProps) {
   const { currentWorkspace } = useWorkspace();
-  const { 
-    addTask, 
-    updateTask, 
-    folders 
-  } = useTask();
+  const { addTask, updateTask, folders } = useTask();
+  const { toast } = useToast();
   
   const isEditMode = !!task;
   
@@ -66,7 +63,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
   useEffect(() => {
     if (task) {
       setTitle(task.title);
-      setDescription(task.description);
+      setDescription(task.description || "");
       setPriority(task.priority);
       setSelectedFolder(task.folderId);
       setStatus(task.status);
@@ -77,7 +74,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         setDueDate(null);
       }
       
-      setSelectedTags(task.tags);
+      setSelectedTags(task.tags || []);
     } else {
       resetForm();
     }

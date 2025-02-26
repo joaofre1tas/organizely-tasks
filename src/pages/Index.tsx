@@ -22,8 +22,8 @@ const Index = () => {
   };
   
   const handleCloseTaskForm = () => {
-    setCurrentTask(null);
     setIsTaskFormOpen(false);
+    setCurrentTask(null);
   };
   
   const renderCurrentView = () => {
@@ -51,11 +51,13 @@ const Index = () => {
             <AppSidebar onViewChange={setCurrentView} currentView={currentView} />
             <main className="flex-1 overflow-auto">
               {renderCurrentView()}
-              <TaskForm 
-                open={isTaskFormOpen} 
-                onClose={handleCloseTaskForm}
-                task={currentTask} 
-              />
+              {isTaskFormOpen && (
+                <TaskForm 
+                  open={isTaskFormOpen} 
+                  onClose={handleCloseTaskForm}
+                  task={currentTask} 
+                />
+              )}
             </main>
           </div>
         </SidebarProvider>
