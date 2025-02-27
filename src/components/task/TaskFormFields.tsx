@@ -71,6 +71,8 @@ export function TaskFormFields({
   onNewFolder,
   onNewTag,
 }: TaskFormFieldsProps) {
+  const [calendarOpen, setCalendarOpen] = React.useState(false);
+
   return (
     <div className="space-y-4 mt-4">
       <div className="space-y-2">
@@ -165,11 +167,12 @@ export function TaskFormFields({
         
         <div className="space-y-2">
           <label className="text-sm font-medium">Data de vencimento</label>
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className="w-full justify-start text-left font-normal"
+                onClick={() => setCalendarOpen(true)}
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {dueDate ? (
@@ -183,7 +186,10 @@ export function TaskFormFields({
               <CalendarComponent
                 mode="single"
                 selected={dueDate || undefined}
-                onSelect={setDueDate}
+                onSelect={(date) => {
+                  setDueDate(date);
+                  setCalendarOpen(false);
+                }}
                 initialFocus
               />
             </PopoverContent>

@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -132,8 +133,8 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     }
   };
   
+  // This function was causing issues by resetting state when the modal is closing
   const handleClose = () => {
-    resetForm();
     onClose();
   };
   
@@ -152,13 +153,15 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         color
       });
       
-      setAvailableTags(prev => [...prev, createdTag]);
-      setSelectedTags(prev => [...prev, createdTag]);
-      
-      toast({
-        title: "Sucesso",
-        description: "Tag criada com sucesso",
-      });
+      if (createdTag) {
+        setAvailableTags(prev => [...prev, createdTag]);
+        setSelectedTags(prev => [...prev, createdTag]);
+        
+        toast({
+          title: "Sucesso",
+          description: "Tag criada com sucesso",
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar tag:", error);
       toast({
@@ -187,12 +190,14 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         icon: "folder"
       });
       
-      setSelectedFolder(createdFolder.id);
-      
-      toast({
-        title: "Sucesso",
-        description: "Pasta criada com sucesso",
-      });
+      if (createdFolder) {
+        setSelectedFolder(createdFolder.id);
+        
+        toast({
+          title: "Sucesso",
+          description: "Pasta criada com sucesso",
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar pasta:", error);
       toast({
@@ -250,6 +255,9 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
           <DialogTitle>
             {isEditMode ? "Editar tarefa" : "Nova tarefa"}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {isEditMode ? "Edite os detalhes da tarefa" : "Preencha os detalhes da nova tarefa"}
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit}>
@@ -286,17 +294,21 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         </form>
       </DialogContent>
       
-      <NewTagDialog 
-        open={isNewTagDialogOpen} 
-        onOpenChange={setIsNewTagDialogOpen}
-        onCreateTag={createNewTag}
-      />
+      {isNewTagDialogOpen && (
+        <NewTagDialog 
+          open={isNewTagDialogOpen} 
+          onOpenChange={setIsNewTagDialogOpen}
+          onCreateTag={createNewTag}
+        />
+      )}
       
-      <NewFolderDialog 
-        open={isNewFolderDialogOpen} 
-        onOpenChange={setIsNewFolderDialogOpen}
-        onCreateFolder={createNewFolder}
-      />
+      {isNewFolderDialogOpen && (
+        <NewFolderDialog 
+          open={isNewFolderDialogOpen} 
+          onOpenChange={setIsNewFolderDialogOpen}
+          onCreateFolder={createNewFolder}
+        />
+      )}
     </Dialog>
   );
 }
