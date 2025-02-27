@@ -190,20 +190,32 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     }
     
     try {
+      // The issue is here - addTag should return a Tag but might be returning void
       const createdTag = addTag({
         name: newTag.name,
         color: newTag.color
       });
       
-      setAvailableTags([...availableTags, createdTag]);
-      setSelectedTags([...selectedTags, createdTag]);
-      setNewTag({ name: "", color: "#4c6ef5" });
-      setIsNewTagDialogOpen(false);
-      
-      toast({
-        title: "Sucesso",
-        description: "Tag criada com sucesso",
-      });
+      // Only proceed if createdTag has an id (is a valid Tag object)
+      if (createdTag && typeof createdTag === 'object' && 'id' in createdTag) {
+        setAvailableTags([...availableTags, createdTag]);
+        setSelectedTags([...selectedTags, createdTag]);
+        setNewTag({ name: "", color: "#4c6ef5" });
+        setIsNewTagDialogOpen(false);
+        
+        toast({
+          title: "Sucesso",
+          description: "Tag criada com sucesso",
+        });
+      } else {
+        // Handle the case where addTag doesn't return a valid tag
+        console.error("Erro: addTag não retornou um objeto Tag válido");
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao criar a tag",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar tag:", error);
       toast({
@@ -241,14 +253,24 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         icon: "folder"
       });
       
-      setSelectedFolder(createdFolder.id);
-      setNewFolder({ name: "" });
-      setIsNewFolderDialogOpen(false);
-      
-      toast({
-        title: "Sucesso",
-        description: "Pasta criada com sucesso",
-      });
+      // Only proceed if createdFolder is a valid Folder object
+      if (createdFolder && typeof createdFolder === 'object' && 'id' in createdFolder) {
+        setSelectedFolder(createdFolder.id);
+        setNewFolder({ name: "" });
+        setIsNewFolderDialogOpen(false);
+        
+        toast({
+          title: "Sucesso",
+          description: "Pasta criada com sucesso",
+        });
+      } else {
+        console.error("Erro: addFolder não retornou um objeto Folder válido");
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao criar a pasta",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar pasta:", error);
       toast({
