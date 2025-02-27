@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useWorkspace } from "./WorkspaceContext";
 import { toast } from "@/hooks/use-toast";
@@ -56,7 +57,7 @@ type TaskContextType = {
   updateSubtask: (taskId: string, subtaskId: string, updates: Partial<SubTask>) => void;
   deleteSubtask: (taskId: string, subtaskId: string) => void;
   toggleSubtaskCompletion: (taskId: string, subtaskId: string) => void;
-  addFolder: (folder: Omit<Folder, "id">) => void;
+  addFolder: (folder: Omit<Folder, "id">) => Folder;
   updateFolder: (id: string, updates: Partial<Folder>) => void;
   deleteFolder: (id: string) => void;
   getTasksByWorkspace: (workspaceId: string) => Task[];
@@ -163,7 +164,7 @@ export const TaskContext = createContext<TaskContextType>({
   updateSubtask: () => null,
   deleteSubtask: () => null,
   toggleSubtaskCompletion: () => null,
-  addFolder: () => null,
+  addFolder: () => ({ id: "", name: "", workspaceId: "", color: "", icon: "" }),
   updateFolder: () => null,
   deleteFolder: () => null,
   getTasksByWorkspace: () => [],
