@@ -7,12 +7,13 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TaskForm } from "@/components/TaskForm";
 import { CalendarView } from "@/components/CalendarView";
+import { FoldersManagement } from "@/components/FoldersManagement";
 import { Task } from "@/contexts/TaskContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<"dashboard" | "calendar" | "today" | "upcoming" | "priority">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "calendar" | "today" | "upcoming" | "priority" | "folders">("dashboard");
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const { toast } = useToast();
   
@@ -38,6 +39,8 @@ const Index = () => {
         return <Dashboard onOpenTaskForm={handleOpenTaskForm} filter="upcoming" />;
       case "priority":
         return <Dashboard onOpenTaskForm={handleOpenTaskForm} filter="priority" />;
+      case "folders":
+        return <FoldersManagement />;
       default:
         return <Dashboard onOpenTaskForm={handleOpenTaskForm} />;
     }

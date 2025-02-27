@@ -32,21 +32,6 @@ interface TaskCardProps {
 export function TaskCard({ task, onEditTask }: TaskCardProps) {
   const { toggleTaskCompletion, deleteTask } = useTask();
   
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-[hsl(var(--priority-urgent))]';
-      case 'high':
-        return 'bg-[hsl(var(--priority-high))]';
-      case 'medium':
-        return 'bg-[hsl(var(--priority-medium))]';
-      case 'low':
-        return 'bg-[hsl(var(--priority-low))]';
-      default:
-        return 'bg-gray-400';
-    }
-  };
-  
   const getPriorityText = (priority: string) => {
     switch (priority) {
       case 'urgent':
@@ -66,8 +51,7 @@ export function TaskCard({ task, onEditTask }: TaskCardProps) {
     <Card className={cn(
       "task-item-hover", 
       task.completed ? "opacity-70" : "",
-      "border-l-4",
-      getPriorityColor(task.priority)
+      "border-l-4 border-gray-300"
     )}>
       <CardHeader className="px-4 py-3 flex flex-row justify-between items-start space-y-0">
         <div className="flex items-start gap-2">
@@ -118,9 +102,8 @@ export function TaskCard({ task, onEditTask }: TaskCardProps) {
       </CardHeader>
       <CardContent className="px-4 py-2">
         {task.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-            {task.description}
-          </p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3" 
+             dangerouslySetInnerHTML={{ __html: task.description }} />
         )}
         
         <div className="flex flex-wrap gap-1.5 mb-2">
@@ -128,11 +111,6 @@ export function TaskCard({ task, onEditTask }: TaskCardProps) {
             <Badge 
               key={tag.id} 
               variant="outline" 
-              style={{ 
-                backgroundColor: `${tag.color}20`, 
-                color: tag.color, 
-                borderColor: `${tag.color}40` 
-              }}
               className="text-xs py-0"
             >
               {tag.name}
