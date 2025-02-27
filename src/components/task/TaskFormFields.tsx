@@ -71,7 +71,14 @@ export function TaskFormFields({
   onNewFolder,
   onNewTag,
 }: TaskFormFieldsProps) {
+  // Controla a visibilidade do popover do calendário
   const [calendarOpen, setCalendarOpen] = React.useState(false);
+
+  // Função para selecionar a data e fechar o calendário
+  const handleDateSelect = (date: Date | undefined) => {
+    setDueDate(date || null);
+    setCalendarOpen(false);
+  };
 
   return (
     <div className="space-y-4 mt-4">
@@ -172,6 +179,7 @@ export function TaskFormFields({
               <Button
                 variant="outline"
                 className="w-full justify-start text-left font-normal"
+                type="button"
                 onClick={() => setCalendarOpen(true)}
               >
                 <Calendar className="mr-2 h-4 w-4" />
@@ -186,10 +194,7 @@ export function TaskFormFields({
               <CalendarComponent
                 mode="single"
                 selected={dueDate || undefined}
-                onSelect={(date) => {
-                  setDueDate(date);
-                  setCalendarOpen(false);
-                }}
+                onSelect={handleDateSelect}
                 initialFocus
               />
             </PopoverContent>
