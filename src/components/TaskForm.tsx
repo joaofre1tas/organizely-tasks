@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Calendar, Tag, X, PlusCircle, Folder } from "lucide-react";
 import { format } from "date-fns";
@@ -62,17 +61,13 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
   const [selectedTags, setSelectedTags] = useState<TaskTag[]>([]);
   const [status, setStatus] = useState<Status>("todo");
   
-  // Estado para diálogos de criação
   const [isNewTagDialogOpen, setIsNewTagDialogOpen] = useState(false);
   const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState<NewTag>({ name: "", color: "#4c6ef5" });
   const [newFolder, setNewFolder] = useState<NewFolder>({ name: "" });
-  
-  // Estado para todas as tags disponíveis
   const [availableTags, setAvailableTags] = useState<TaskTag[]>([]);
   
   useEffect(() => {
-    // Carregar todas as tags
     setAvailableTags(getTags());
   }, [getTags]);
   
@@ -94,7 +89,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     } else {
       resetForm();
     }
-  }, [task, open]);
+  }, [task]);
   
   const resetForm = () => {
     setTitle("");
@@ -106,7 +101,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     setStatus("todo");
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
@@ -120,7 +115,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     
     try {
       if (isEditMode && task) {
-        updateTask(task.id, {
+        await updateTask(task.id, {
           title,
           description,
           priority,
@@ -135,7 +130,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
           description: "Tarefa atualizada com sucesso",
         });
       } else if (currentWorkspace) {
-        addTask({
+        await addTask({
           title,
           description,
           priority,
@@ -164,22 +159,20 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     }
   };
   
-  const handleCancel = () => {
+  const handleClose = () => {
     resetForm();
     onClose();
   };
   
   const toggleTag = (tag: TaskTag) => {
-    const exists = selectedTags.some(t => t.id === tag.id);
-    
-    if (exists) {
-      setSelectedTags(selectedTags.filter(t => t.id !== tag.id));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
+    setSelectedTags(prev => 
+      prev.some(t => t.id === tag.id)
+        ? prev.filter(t => t.id !== tag.id)
+        : [...prev, tag]
+    );
   };
   
-  const createNewTag = () => {
+  const createNewTag = async () => {
     if (!newTag.name.trim()) {
       toast({
         title: "Erro",
@@ -195,8 +188,8 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         color: newTag.color
       });
       
-      setAvailableTags([...availableTags, createdTag]);
-      setSelectedTags([...selectedTags, createdTag]);
+      setAvailableTags(prev => [...prev, createdTag]);
+      setSelectedTags(prev => [...prev, createdTag]);
       setNewTag({ name: "", color: "#4c6ef5" });
       setIsNewTagDialogOpen(false);
       
@@ -214,7 +207,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     }
   };
   
-  const createNewFolder = () => {
+  const createNewFolder = async () => {
     if (!newFolder.name.trim()) {
       toast({
         title: "Erro",
@@ -292,7 +285,6 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
     const newText = description.substring(0, start) + formattedText + description.substring(end);
     setDescription(newText);
     
-    // Focus back on textarea after formatting
     setTimeout(() => {
       textarea.focus();
       textarea.selectionStart = start + formattedText.length;
@@ -301,215 +293,212 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
   };
   
   return (
-    <>
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {isEditMode ? "Editar tarefa" : "Nova tarefa"}
-            </DialogTitle>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditMode ? "Editar tarefa" : "Nova tarefa"}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Input
+              placeholder="Título da tarefa"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+            />
+          </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <div className="flex gap-1 mb-1">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-2 text-xs"
+                onClick={() => formatText('bold')}
+              >
+                B
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-2 text-xs italic"
+                onClick={() => formatText('italic')}
+              >
+                I
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-2 text-xs underline"
+                onClick={() => formatText('underline')}
+              >
+                U
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-2 text-xs"
+                onClick={() => formatText('bullet')}
+              >
+                •
+              </Button>
+            </div>
+            <Textarea
+              id="task-description"
+              placeholder="Descrição (opcional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Input
-                placeholder="Título da tarefa"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                autoFocus
-              />
+              <label className="text-sm font-medium">Prioridade</label>
+              <Select 
+                value={priority} 
+                onValueChange={(value) => setPriority(value as Priority)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a prioridade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="urgent">Urgente</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                  <SelectItem value="medium">Média</SelectItem>
+                  <SelectItem value="low">Baixa</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
-              <div className="flex gap-1 mb-1">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-7 px-2 text-xs"
-                  onClick={() => formatText('bold')}
-                >
-                  B
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-7 px-2 text-xs italic"
-                  onClick={() => formatText('italic')}
-                >
-                  I
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-7 px-2 text-xs underline"
-                  onClick={() => formatText('underline')}
-                >
-                  U
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-7 px-2 text-xs"
-                  onClick={() => formatText('bullet')}
-                >
-                  •
-                </Button>
-              </div>
-              <Textarea
-                id="task-description"
-                placeholder="Descrição (opcional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
+              <label className="text-sm font-medium">Status</label>
+              <Select 
+                value={status} 
+                onValueChange={(value) => setStatus(value as Status)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todo">A Fazer</SelectItem>
+                  <SelectItem value="in-progress">Em Andamento</SelectItem>
+                  <SelectItem value="completed">Concluído</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Prioridade</label>
-                <Select 
-                  value={priority} 
-                  onValueChange={(value) => setPriority(value as Priority)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a prioridade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="urgent">Urgente</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="medium">Média</SelectItem>
-                    <SelectItem value="low">Baixa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
-                <Select 
-                  value={status} 
-                  onValueChange={(value) => setStatus(value as Status)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todo">A Fazer</SelectItem>
-                    <SelectItem value="in-progress">Em Andamento</SelectItem>
-                    <SelectItem value="completed">Concluído</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">Pasta</label>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-6 px-2"
-                    onClick={() => setIsNewFolderDialogOpen(true)}
-                  >
-                    <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">Nova</span>
-                  </Button>
-                </div>
-                <Select 
-                  value={selectedFolder || "none"} 
-                  onValueChange={(value) => setSelectedFolder(value === "none" ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma pasta" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sem pasta</SelectItem>
-                    {workspaceFolders.map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Data de vencimento</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {dueDate ? (
-                        format(dueDate, "PPP", { locale: pt })
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={dueDate || undefined}
-                      onSelect={setDueDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">Tags</label>
+                <label className="text-sm font-medium">Pasta</label>
                 <Button 
                   type="button" 
                   variant="ghost" 
                   size="sm" 
                   className="h-6 px-2"
-                  onClick={() => setIsNewTagDialogOpen(true)}
+                  onClick={() => setIsNewFolderDialogOpen(true)}
                 >
                   <PlusCircle className="h-3.5 w-3.5 mr-1" />
                   <span className="text-xs">Nova</span>
                 </Button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => {
-                  const isSelected = selectedTags.some(t => t.id === tag.id);
-                  return (
-                    <Badge
-                      key={tag.id}
-                      variant={isSelected ? "default" : "outline"}
-                      className="cursor-pointer"
-                      onClick={() => toggleTag(tag)}
-                    >
-                      {tag.name}
-                    </Badge>
-                  );
-                })}
-              </div>
+              <Select 
+                value={selectedFolder || "none"} 
+                onValueChange={(value) => setSelectedFolder(value === "none" ? null : value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma pasta" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem pasta</SelectItem>
+                  {workspaceFolders.map((folder) => (
+                    <SelectItem key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCancel}>
-                Cancelar
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Data de vencimento</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {dueDate ? (
+                      format(dueDate, "PPP", { locale: pt })
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dueDate || undefined}
+                    onSelect={setDueDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium">Tags</label>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2"
+                onClick={() => setIsNewTagDialogOpen(true)}
+              >
+                <PlusCircle className="h-3.5 w-3.5 mr-1" />
+                <span className="text-xs">Nova</span>
               </Button>
-              <Button type="submit">
-                {isEditMode ? "Atualizar" : "Criar"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => {
+                const isSelected = selectedTags.some(t => t.id === tag.id);
+                return (
+                  <Badge
+                    key={tag.id}
+                    variant={isSelected ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag.name}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose}>
+              Cancelar
+            </Button>
+            <Button type="submit">
+              {isEditMode ? "Atualizar" : "Criar"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
       
-      {/* Diálogo para criar nova tag */}
       <Dialog open={isNewTagDialogOpen} onOpenChange={setIsNewTagDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -553,7 +542,6 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         </DialogContent>
       </Dialog>
       
-      {/* Diálogo para criar nova pasta */}
       <Dialog open={isNewFolderDialogOpen} onOpenChange={setIsNewFolderDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -580,6 +568,6 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </Dialog>
   );
 }
